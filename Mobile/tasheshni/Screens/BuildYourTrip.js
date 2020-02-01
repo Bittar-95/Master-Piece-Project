@@ -8,7 +8,10 @@ import {
   Image,
   TouchableOpacity,
   Button,
-  AsyncStorage
+  AsyncStorage,
+  ImageBackground,
+  TouchableWithoutFeedback,
+  ScrollView
 } from "react-native";
 import { Actions } from "react-native-router-flux";
 
@@ -16,7 +19,7 @@ class BuildYourTrip extends Component {
   state = { data: [] };
   componentDidMount = () => {
     axios
-      .get("http://192.168.1.105:9000/buildYourTrip")
+      .get("http://192.168.43.188:9000/buildYourTrip")
       .then(({ data }) => {
         this.setState({ data: data });
       })
@@ -27,36 +30,43 @@ class BuildYourTrip extends Component {
   render() {
     return (
       <View style={styles.container}>
-        <View>
+        <ImageBackground
+          source={require("../Public/tashashni_logo.png")}
+          style={{ width: 156, height: 49, position: "absolute", top: 36 }}
+        ></ImageBackground>
+        <ScrollView style={{ marginTop: 125, width: 250, height: 200 }}>
           {this.state.data.map((bus) => {
-            return bus.businesses.map((x) => (
+            return bus.businesses.map((business, index) => (
               <TouchableOpacity
                 onPress={() => {
-                  //   console.log(x.items);
-                  Actions.BuildYItem(x.items);
+                  //   console.log(business.items);
+                  Actions.BuildYItem(business.items);
                 }}
+                key={index}
               >
-                <View>
-                  <Text>{x.title}</Text>
+                <View style={styles.flatView}>
                   <Image
-                    style={{ width: 50, height: 50 }}
+                    style={styles.flatImage}
                     source={{
-                      uri: `http://192.168.1.105:9000/${x.busIMG}`
+                      uri: `http://192.168.43.188:9000/${business.busIMG}`
                     }}
                   />
-                  <Text>{x.type}</Text>
+                  <Text style={styles.type}>{business.type}</Text>
+                  <Text>{business.title}</Text>
                 </View>
               </TouchableOpacity>
             ));
           })}
-        </View>
-
-        <Button
-          title="Your Own Trip"
+        </ScrollView>
+        <TouchableWithoutFeedback
           onPress={() => {
             Actions.yourOwnTrip();
           }}
-        />
+        >
+          <View>
+            <Text style={styles.buttons}>Your Own Trip</Text>
+          </View>
+        </TouchableWithoutFeedback>
       </View>
     );
   }
@@ -68,5 +78,39 @@ const styles = StyleSheet.create({
     backgroundColor: "#fff",
     alignItems: "center",
     justifyContent: "center"
+  },
+  buttons: {
+    textAlign: "center",
+    paddingTop: 5,
+    paddingBottom: 5,
+    backgroundColor: "#033e8c",
+    color: "white",
+    fontSize: 14,
+    marginTop: 11,
+    width: 214,
+    borderWidth: 2,
+    borderTopLeftRadius: 5,
+    borderBottomRightRadius: 5,
+    borderColor: "#0455bf",
+    fontWeight: "bold"
+  },
+  flatView: {
+    backgroundColor: "#f5f5f5",
+    borderRadius: 10,
+    height: 200,
+    padding: 10,
+    marginVertical: 10,
+    borderWidth: 1,
+    borderColor: "gray"
+  },
+  flatImage: {
+    width: "100%",
+    height: "75%",
+    borderColor: "gray",
+    borderWidth: 1
+  },
+  type: {
+    fontWeight: "bold",
+    color: "gray"
   }
 });

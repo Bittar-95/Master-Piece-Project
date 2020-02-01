@@ -6,14 +6,16 @@ import {
   StyleSheet,
   Text,
   View,
-  Button,
   Keyboard,
   TextInput,
   CheckBox,
   FlatList,
   Image,
   TouchableOpacity,
-  AsyncStorage
+  AsyncStorage,
+  ImageBackground,
+  ScrollView,
+  TouchableWithoutFeedback
 } from "react-native";
 import { Actions } from "react-native-router-flux";
 class OutTrip extends Component {
@@ -59,208 +61,225 @@ class OutTrip extends Component {
   render() {
     return (
       <View style={styles.container}>
-        <TextInput
-          placeholder="Your Budget"
-          keyboardType={"numeric"}
-          onChange={(event) => {
-            this.setState({
-              eatBU: event.nativeEvent.text * 0.4,
-              enterBU: event.nativeEvent.text * 0.4,
-              tranBU: event.nativeEvent.text * 0.2
-            });
-          }}
-        />
-        <Button
-          title="Find Best Trip"
-          onPress={async () => {
-            if (!this.state.eat) {
-              axios
-                .get(
-                  `http://192.168.1.105:9000/getTripsRestaurant?budget=${this.state.eatBU}`
-                )
-                .then(({ data }) => {
-                  this.setState({ bussiness_restaurants: data });
-                })
-                .catch((error) => {
-                  alert(error);
-                });
-            } else {
+        <ImageBackground
+          source={require("../Public/tashashni_logo.png")}
+          style={{ width: 156, height: 49, position: "absolute", top: 36 }}
+        ></ImageBackground>
+        <View style={{ marginTop: 125 }}>
+          <TextInput
+            style={{
+              borderWidth: 3,
+              borderRadius: 25,
+              paddingHorizontal: 10,
+              paddingVertical: 4,
+              backgroundColor: "#f5f5f5",
+              borderColor: "gray",
+              color: "#737373"
+            }}
+            placeholder="Your Budget"
+            keyboardType={"numeric"}
+            onChange={(event) => {
               this.setState({
-                bussiness_restaurants: [],
-                enterBU: this.state.eatBU
+                eatBU: event.nativeEvent.text * 0.4,
+                enterBU: event.nativeEvent.text * 0.4,
+                tranBU: event.nativeEvent.text * 0.2
               });
-            }
-            if (this.state.car) {
-              await this._getLocation();
-            }
-            if (!this.state.entertainment) {
-              axios
-                .get(
-                  `http://192.168.1.105:9000/getTripsEntertainment?budget=${this.state.enterBU}`
-                )
-                .then(({ data }) => {
-                  this.setState({ bussiness_entertainment: data });
-                })
-                .catch((error) => {
-                  alert(error);
+            }}
+          />
+          <TouchableWithoutFeedback
+            onPress={async () => {
+              if (!this.state.eat) {
+                axios
+                  .get(
+                    `http://192.168.43.188:9000/getTripsRestaurant?budget=${this.state.eatBU}`
+                  )
+                  .then(({ data }) => {
+                    this.setState({ bussiness_restaurants: data });
+                  })
+                  .catch((error) => {
+                    alert(error);
+                  });
+              } else {
+                this.setState({
+                  bussiness_restaurants: [],
+                  enterBU: this.state.eatBU
                 });
-            } else {
-              this.setState({
-                bussiness_entertainment: [],
-                eatBU: this.state.enterBU
-              });
-            }
-
-            await AsyncStorage.removeItem("Offers");
-            Keyboard.dismiss();
-          }}
-        />
-        <View style={{ flexDirection: "row" }}>
-          <CheckBox
-            value={this.state.car}
-            onChange={() => this.setState({ car: !this.state.car })}
-          />
-          <Text style={{ marginTop: 7 }}>Do Not Have A Car ?</Text>
-        </View>
-
-        <View style={{ flexDirection: "row" }}>
-          <CheckBox
-            value={this.state.eat}
-            onChange={() => this.setState({ eat: !this.state.eat })}
-          />
-          <Text style={{ marginTop: 7 }}>Would Not Like To Eat ?</Text>
-        </View>
-
-        <View style={{ flexDirection: "row" }}>
-          <CheckBox
-            value={this.state.entertainment}
-            onChange={() =>
-              this.setState({ entertainment: !this.state.entertainment })
-            }
-          />
-          <Text style={{ marginTop: 7 }}>
-            Would Not Like To Entertainment ?
-          </Text>
-        </View>
-        <FlatList
-          data={this.state.bussiness_entertainment}
-          renderItem={({ item }) => {
-            if (this.state.currentLocation != null) {
-              let transportationSalary = this.distance(
-                item._id.latitude,
-                item._id.longitude,
-                this.state.currentLocation.latitude,
-                this.state.currentLocation.longitude
-              );
-              if (transportationSalary <= this.state.tranBU) {
-                return (
-                  <TouchableOpacity
-                    onPress={() => {
-                      Actions.ContainerItems(item);
-                    }}
-                  >
-                    <View>
-                      <Text>{item._id.title}</Text>
-                      <Image
-                        style={{ width: 50, height: 50 }}
-                        source={{
-                          uri: `http://192.168.1.129:9000/${item._id.busIMG}`
-                        }}
-                      />
-                    </View>
-                  </TouchableOpacity>
-                );
               }
-            } else {
-              return (
-                <TouchableOpacity
-                  onPress={() => {
-                    Actions.ContainerItems(item);
-                  }}
-                >
-                  <View>
-                    <Text>{item._id.title}</Text>
-                    <Image
-                      style={{ width: 50, height: 50 }}
-                      source={{
-                        uri: `http://192.168.1.105:9000/${item._id.busIMG}`
-                      }}
-                    />
-                  </View>
-                </TouchableOpacity>
-              );
-            }
-          }}
-          keyExtractor={(item) => item._id.id}
-        />
-
-        <FlatList
-          data={this.state.bussiness_restaurants}
-          renderItem={({ item }) => {
-            if (this.state.currentLocation != null) {
-              let transportationSalary = this.distance(
-                item._id.latitude,
-                item._id.longitude,
-                this.state.currentLocation.latitude,
-                this.state.currentLocation.longitude
-              );
-              if (transportationSalary <= this.state.tranBU) {
-                return (
-                  <TouchableOpacity
-                    onPress={() => {
-                      Actions.ContainerItems(item);
-                    }}
-                  >
-                    <View>
-                      <Text>{item._id.title}</Text>
-                      <Image
-                        style={{ width: 50, height: 50 }}
-                        source={{
-                          uri: `http://192.168.1.129:9000/${item._id.busIMG}`
-                        }}
-                      />
-                    </View>
-                  </TouchableOpacity>
-                );
+              if (this.state.car) {
+                await this._getLocation();
               }
-            } else {
-              return (
-                <TouchableOpacity
-                  onPress={() => {
-                    Actions.ContainerItems(item);
-                  }}
-                >
-                  <View>
-                    <Text>{item._id.title}</Text>
-                    <Image
-                      style={{ width: 50, height: 50 }}
-                      source={{
-                        uri: `http://192.168.1.129:9000/${item._id.busIMG}`
+              if (!this.state.entertainment) {
+                axios
+                  .get(
+                    `http://192.168.43.188:9000/getTripsEntertainment?budget=${this.state.enterBU}`
+                  )
+                  .then(({ data }) => {
+                    this.setState({ bussiness_entertainment: data });
+                  })
+                  .catch((error) => {
+                    alert(error);
+                  });
+              } else {
+                this.setState({
+                  bussiness_entertainment: [],
+                  eatBU: this.state.enterBU
+                });
+              }
+
+              await AsyncStorage.removeItem("Offers");
+              Keyboard.dismiss();
+            }}
+          >
+            <Text style={styles.buttons}>Find Best Trip</Text>
+          </TouchableWithoutFeedback>
+          <View style={{ flexDirection: "row" }}>
+            <CheckBox
+              value={this.state.car}
+              onChange={() => this.setState({ car: !this.state.car })}
+            />
+            <Text style={{ marginTop: 7 }}>Do Not Have A Car ?</Text>
+          </View>
+
+          <View style={{ flexDirection: "row" }}>
+            <CheckBox
+              value={this.state.eat}
+              onChange={() => this.setState({ eat: !this.state.eat })}
+            />
+            <Text style={{ marginTop: 7 }}>Would Not Like To Eat ?</Text>
+          </View>
+
+          <View style={{ flexDirection: "row" }}>
+            <CheckBox
+              value={this.state.entertainment}
+              onChange={() =>
+                this.setState({ entertainment: !this.state.entertainment })
+              }
+            />
+            <Text style={{ marginTop: 7 }}>
+              Would Not Like To Entertainment ?
+            </Text>
+          </View>
+          <ScrollView>
+            <FlatList
+              data={this.state.bussiness_entertainment}
+              renderItem={({ item }) => {
+                if (this.state.currentLocation != null) {
+                  let transportationSalary = this.distance(
+                    item._id.latitude,
+                    item._id.longitude,
+                    this.state.currentLocation.latitude,
+                    this.state.currentLocation.longitude
+                  );
+                  if (transportationSalary <= this.state.tranBU) {
+                    return (
+                      <TouchableOpacity
+                        onPress={() => {
+                          Actions.ContainerItems(item);
+                        }}
+                      >
+                        <View style={styles.flatView}>
+                          <Image
+                            style={styles.flatImage}
+                            source={{
+                              uri: `http://192.168.43.188:9000/${item._id.busIMG}`
+                            }}
+                          />
+                          <Text style={styles.type}>{item._id.type}</Text>
+
+                          <Text>{item._id.title}</Text>
+                        </View>
+                      </TouchableOpacity>
+                    );
+                  }
+                } else {
+                  return (
+                    <TouchableOpacity
+                      onPress={() => {
+                        Actions.ContainerItems(item);
                       }}
-                    />
-                  </View>
-                </TouchableOpacity>
-              );
-            }
-          }}
-          keyExtractor={(item) => item._id.id}
-        />
+                    >
+                      <View style={styles.flatView}>
+                        <Image
+                          style={styles.flatImage}
+                          source={{
+                            uri: `http://192.168.43.188:9000/${item._id.busIMG}`
+                          }}
+                        />
+                        <Text style={styles.type}>{item._id.type}</Text>
+                        <Text>{item._id.title}</Text>
+                      </View>
+                    </TouchableOpacity>
+                  );
+                }
+              }}
+              keyExtractor={(item) => item._id.id}
+            />
 
-        {/* ----------------------------------------------------------------- */}
-        {/* <FlatList
-          data={this.state.bussiness_restaurants}
-          renderItem={({ item }) => {
-            console.log(this.state);
-          }}
-          keyExtractor={(item) => item._id.id}
-        /> */}
+            <FlatList
+              data={this.state.bussiness_restaurants}
+              renderItem={({ item }) => {
+                if (this.state.currentLocation != null) {
+                  let transportationSalary = this.distance(
+                    item._id.latitude,
+                    item._id.longitude,
+                    this.state.currentLocation.latitude,
+                    this.state.currentLocation.longitude
+                  );
+                  if (transportationSalary <= this.state.tranBU) {
+                    return (
+                      <TouchableOpacity
+                        onPress={() => {
+                          Actions.ContainerItems(item);
+                        }}
+                      >
+                        <View style={styles.flatView}>
+                          <Image
+                            style={styles.flatImage}
+                            source={{
+                              uri: `http://192.168.43.188:9000/${item._id.busIMG}`
+                            }}
+                          />
+                          <Text style={styles.type}>{item._id.type}</Text>
 
-        <Button
-          title="Your Trip Path"
-          onPress={() => {
-            Actions.yourTrip();
-          }}
-        />
+                          <Text>{item._id.title}</Text>
+                        </View>
+                      </TouchableOpacity>
+                    );
+                  }
+                } else {
+                  return (
+                    <TouchableOpacity
+                      onPress={() => {
+                        Actions.ContainerItems(item);
+                      }}
+                    >
+                      <View style={styles.flatView}>
+                        <Image
+                          style={styles.flatImage}
+                          source={{
+                            uri: `http://192.168.43.188:9000/${item._id.busIMG}`
+                          }}
+                        />
+                        <Text style={styles.type}>{item._id.type}</Text>
+
+                        <Text>{item._id.title}</Text>
+                      </View>
+                    </TouchableOpacity>
+                  );
+                }
+              }}
+              keyExtractor={(item) => item._id.id}
+            />
+          </ScrollView>
+
+          <TouchableOpacity
+            onPress={() => {
+              Actions.yourTrip();
+            }}
+          >
+            <Text style={styles.buttons}>Your Trip Path</Text>
+          </TouchableOpacity>
+        </View>
       </View>
     );
   }
@@ -272,40 +291,41 @@ const styles = StyleSheet.create({
     backgroundColor: "#fff",
     alignItems: "center",
     justifyContent: "center"
+  },
+  buttons: {
+    textAlign: "center",
+    paddingTop: 5,
+    paddingBottom: 5,
+    backgroundColor: "#033e8c",
+    color: "white",
+    fontSize: 14,
+    marginTop: 11,
+    width: 214,
+    borderWidth: 2,
+    borderTopLeftRadius: 5,
+    borderBottomRightRadius: 5,
+    borderColor: "#0455bf",
+    fontWeight: "bold"
+  },
+  flatView: {
+    backgroundColor: "#f5f5f5",
+    borderRadius: 10,
+    height: 200,
+    padding: 10,
+    marginVertical: 10,
+    borderWidth: 1,
+    borderColor: "gray"
+  },
+  flatImage: {
+    width: "100%",
+    height: "75%",
+    borderColor: "gray",
+    borderWidth: 1
+  },
+  type: {
+    fontWeight: "bold",
+    color: "gray"
   }
 });
 
 export default OutTrip;
-
-{
-  /* let transportationSalary = this.distance(
-  item._id.latitude,
-  item._id.longitude,
-  this.state.currentLocation.latitude,
-  this.state.currentLocation.longitude
-); */
-}
-
-// console.log(this.state.currentLocation);
-{
-  /*
-if (transportationSalary <= this.state.tranBU) {
-  return (
-    <TouchableOpacity
-      onPress={() => {
-        Actions.ContainerItems(item);
-      }}
-    >
-      <View>
-        <Text>{item._id.title}</Text>
-        <Image
-          style={{ width: 50, height: 50 }}
-          source={{
-            uri: `http://192.168.1.129:9000/${item._id.busIMG}`
-          }}
-        />
-      </View>
-    </TouchableOpacity>
-  );
-} */
-}

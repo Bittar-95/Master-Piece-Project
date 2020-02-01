@@ -6,9 +6,11 @@ import {
   View,
   TouchableOpacity,
   FlatList,
+  ImageBackground,
   Image,
   Button,
-  AsyncStorage
+  AsyncStorage,
+  ScrollView
 } from "react-native";
 class Items extends Component {
   state = { items: [], clicked: false };
@@ -19,17 +21,36 @@ class Items extends Component {
   };
   render() {
     return (
-      <View>
-        <FlatList
-          data={this.state.items}
-          renderItem={({ item }) => (
-            <View>
-              <Item itemData={item} />
-              {/* <Text>Hello</Text> */}
+      <View style={{ backgroundColor: "white" }}>
+        <View style={styles.container}>
+          <ImageBackground
+            source={require("../Public/tashashni_logo.png")}
+            style={{ width: 156, height: 49, position: "absolute", top: 36 }}
+          ></ImageBackground>
+        </View>
+        <View style={{ marginTop: 125 }}>
+          <ScrollView>
+            <View style={{ alignItems: "center" }}>
+              <FlatList
+                numColumns={3}
+                data={this.state.items}
+                renderItem={({ item }) => (
+                  <View
+                    style={{
+                      margin: 5,
+                      borderWidth: 3,
+                      borderColor: "#d9d9d9",
+                      backgroundColor: "#f5f5f5"
+                    }}
+                  >
+                    <Item itemData={item} />
+                  </View>
+                )}
+                keyExtractor={(item) => item._id}
+              />
             </View>
-          )}
-          keyExtractor={(item) => item._id}
-        />
+          </ScrollView>
+        </View>
       </View>
     );
   }

@@ -4,14 +4,14 @@ import {
   Text,
   Image,
   TouchableOpacity,
-  Button,
-  AsyncStorage
+  AsyncStorage,
+  ScrollView
 } from "react-native";
 class BuildItem extends Component {
   state = { clicked: false, index: null };
 
   render() {
-    const { name, price, itemIMG } = this.props.items;
+    const { name, price, itemIMG, description } = this.props.items;
     return (
       <TouchableOpacity
         onPress={async () => {
@@ -21,9 +21,6 @@ class BuildItem extends Component {
                 "buildItems",
                 JSON.stringify([this.props.items])
               );
-              {
-                /* console.log(await AsyncStorage.getItem("Offers")); */
-              }
             } else {
               let locaStorage = JSON.parse(
                 await AsyncStorage.getItem("buildItems")
@@ -54,15 +51,30 @@ class BuildItem extends Component {
           }
         }}
       >
-        <View>
-          <Text>{name}</Text>
-          <Text>{price}</Text>
+        <View
+          style={{
+            margin: 5,
+            borderWidth: 3,
+            borderColor: "#d9d9d9",
+            backgroundColor: "#f5f5f5"
+          }}
+        >
           <Image
-            style={{ width: 50, height: 50 }}
+            style={{ width: 100, height: 100 }}
             source={{
-              uri: `http://192.168.1.105:9000/${itemIMG}`
+              uri: `http://192.168.43.188:9000/${itemIMG}`
             }}
           />
+          <View style={{ padding: 5 }}>
+            <Text style={{ fontWeight: "bold" }}>{name}</Text>
+            <Text style={{ fontWeight: "bold", color: "gray" }}>
+              {description}
+            </Text>
+          </View>
+
+          <Text style={{ fontWeight: "bold", alignSelf: "flex-end" }}>
+            {price} J.D
+          </Text>
         </View>
       </TouchableOpacity>
     );
